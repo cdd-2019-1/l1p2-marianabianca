@@ -1,13 +1,41 @@
 ---
-title: "Lab1 CDD"
+title: "Lab1 CDD - Parlamentares no Twitter"
 output:
     html_document:
     df_print: paged
 theme: sandstone
 ---
+***
 
-#Introdução
-####  A análise desenvolvida nesse relatório se trata da segunda parte do laboratório 1 da disciplina Ciência de Dados Descritiva do curso de Ciência da Computação da UFCG.
+<br>
+
+## Introdução
+
+***
+
+#####  A análise desenvolvida nesse relatório trata-se da segunda parte do laboratório 1 da disciplina Ciência de Dados Descritiva do curso de Ciência da Computação da UFCG.
+
+##### Na primeira parte do laborátio cada aluno desenvolveu seis perguntas a cerca dos dados disponibilizados pelo professor. O aluno pôde escolher entre dados que diziam respeito à séries de televisão, retirados do site IMDB, ou dados sobre os *Twitters* de parlamentares no ano de 2019. Os dados escolhidos por mim foram os dos parlamentares.
+
+##### No desenvolvimento das perguntas na primeira parte do laboratório precisamos escolher um público alvo, cujo escolhi ser pessoas com interesse em entender como os parlamentares se relacionam e agem no *Twitter*.
+
+##### Das seis perguntas, tivemos que escolher duas e utilizar textos explicativos e visualizações criadas a partir dos dados para respondê-las. As minhas duas perguntas escolhidas foram:
+##### 1. Quais foram as UFs que mais participaram do Twitter?
+##### 2. Quais foram as UFs que tiveram mais engajamento médio?   
+
+##### Depois de reponder as duas perguntas acima precisamos criar mais duas perguntas a partir delas e respondê-las também usando visualizações e texto explicativo.
+
+<br>
+
+## Desenvolvimento das perguntas
+
+***
+
+<br>
+
+### Quais foram as UFs que mais participaram do Twitter?
+
+***
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -18,70 +46,53 @@ theme_set(theme_bw())
 ```{r}
 atividade = read_projectdata()
 ```
+###### Atribuindo os dados à variável *atividade*
+
+##### Para responder essa pergunta utilizei as variáveis *n_proprio* e *n_retweet*, que ao serem somadas dão o total de tweets postados e retweetados (com e sem comentário) de cada usuário (parlamentar). Inicialmente para saber quais UFs mais participaram somei as variáveis e plotei em um gráfico de barras:
 
 ```{r}
-participacao_UF =
-  atividade %>% 
+atividade %>% 
   filter(!is.na(n_proprio)) %>% 
   filter(!is.na(n_retweet)) %>% 
   group_by(UF) %>% 
-  summarise(participacao = sum(n_proprio) + sum(n_retweet), parlamentares = n())
-
-partic= sort(participacao_UF$participacao)
-top_5_part = partic[length(partic)-4]
-    
-participacao_UF %>% 
+  summarise(participacao = sum(n_proprio) + sum(n_retweet), parlamentares = n()) %>% 
   ggplot() +
-  geom_bar(stat="identity", aes(x = reorder(UF, -participacao), y = participacao, fill = participacao >= top_5_part)) +
-  scale_fill_manual(labels = c("Outros", "Top 5"), values = c("#F8766D", "#00BFC4"), guide = guide_legend(reverse = TRUE)) +
+  geom_bar(stat="identity", aes(x = reorder(UF, -participacao), y = participacao)) +
   xlab("UF") +
   ylab("Participação") +
   labs(fill = "UFs") +
-  ggtitle("Participação total de parlamentares de cada UF no twitter em 2019")
+  ggtitle("Participação total de parlamentares de cada UF no twitter em 2019") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ```{r}
-participacao_UF =
-  atividade %>% 
+atividade %>% 
   filter(!is.na(n_proprio)) %>% 
   filter(!is.na(n_retweet)) %>% 
   group_by(UF) %>% 
-  summarise(parlamentares = n(), participacao = (sum(n_proprio) + sum(n_retweet))/parlamentares)
-
-partic= sort(participacao_UF$participacao)
-top_5_part = partic[length(partic)-4]
-    
-participacao_UF %>% 
+  summarise(parlamentares = n(), participacao = (sum(n_proprio) + sum(n_retweet))/parlamentares) %>% 
   ggplot() +
-  geom_bar(stat="identity", aes(x = reorder(UF, -participacao) , y = participacao, fill = participacao >= top_5_part)) +
-  scale_fill_manual(labels = c("Outros", "Top 5"), values = c("#F8766D", "#00BFC4"), guide = guide_legend(reverse = TRUE)) +
+  geom_bar(stat="identity", aes(x = reorder(UF, -participacao) , y = participacao)) +
   xlab("UF") +
   ylab("Participação") +
   labs(fill = "UFs") +
-  ggtitle("Participação por parlamentares de cada UF no twitter em 2019")
+  ggtitle("Participação por parlamentares de cada UF no twitter em 2019") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 
-# UFs com mais parlamentares no twitter
 ```{r}
-
-tt_parlamentares =
-  atividade %>% 
+atividade %>% 
   filter(!is.na(twitter)) %>% 
   group_by(UF) %>% 
-  summarise(possui_tt = n())
-
-top_5_tt = tt_parlamentares$possui_tt[length(tt_parlamentares$possui_tt)-4]
-
-tt_parlamentares %>% 
+  summarise(possui_tt = n()) %>% 
   ggplot() +
-  geom_bar(stat="identity", aes(x = reorder(UF, -possui_tt) , y = possui_tt, fill = possui_tt >= top_5_tt)) +
-  scale_fill_manual(labels = c("Outros", "Top 5"), values = c("#F8766D", "#00BFC4"), guide = guide_legend(reverse = TRUE)) +
+  geom_bar(stat="identity", aes(x = reorder(UF, -possui_tt) , y = possui_tt)) +
   xlab("UF") +
   ylab("Contas") +
   labs(fill = "Contas de twitter por UF") +
-  ggtitle("Contas de twitter ativas em 2019 de parlamentares por UF")
-
+  ggtitle("Contas de twitter ativas em 2019 de parlamentares por UF") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ```{r}
@@ -94,7 +105,8 @@ atividade %>%
   ylab("Média engajamento total") +
   xlab("UF") +
   scale_y_continuous(breaks = seq(0, 250000, by = 30000)) +
-  ggtitle("Engajamento total médio de cada UF")
+  ggtitle("Engajamento total médio de cada UF") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ```{r}
@@ -107,6 +119,6 @@ atividade %>%
   ylab("Média engajamento total por parlamentar") +
   xlab("UF") +
   scale_y_continuous(breaks = seq(0, 250000, by = 30000)) +
-  ggtitle("Engajamento total médio por parlamentar de cada UF")
+  ggtitle("Engajamento total médio por parlamentar de cada UF") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
-
