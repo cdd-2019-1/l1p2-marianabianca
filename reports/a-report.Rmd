@@ -1,10 +1,13 @@
 ---
-title: "REPLACE ME"
+title: "Lab1 CDD"
 output:
     html_document:
     df_print: paged
 theme: sandstone
 ---
+
+#Introdução
+####  A análise desenvolvida nesse relatório se trata da segunda parte do laboratório 1 da disciplina Ciência de Dados Descritiva do curso de Ciência da Computação da UFCG.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -12,6 +15,98 @@ source(here::here("code/lib.R"))
 theme_set(theme_bw())
 ```
 
-```{r read}
+```{r}
 atividade = read_projectdata()
 ```
+
+```{r}
+participacao_UF =
+  atividade %>% 
+  filter(!is.na(n_proprio)) %>% 
+  filter(!is.na(n_retweet)) %>% 
+  group_by(UF) %>% 
+  summarise(participacao = sum(n_proprio) + sum(n_retweet), parlamentares = n())
+
+partic= sort(participacao_UF$participacao)
+top_5_part = partic[length(partic)-4]
+    
+participacao_UF %>% 
+  ggplot() +
+  geom_bar(stat="identity", aes(x = reorder(UF, -participacao), y = participacao, fill = participacao >= top_5_part)) +
+  scale_fill_manual(labels = c("Outros", "Top 5"), values = c("#F8766D", "#00BFC4"), guide = guide_legend(reverse = TRUE)) +
+  xlab("UF") +
+  ylab("Participação") +
+  labs(fill = "UFs") +
+  ggtitle("Participação total de parlamentares de cada UF no twitter em 2019")
+```
+
+```{r}
+participacao_UF =
+  atividade %>% 
+  filter(!is.na(n_proprio)) %>% 
+  filter(!is.na(n_retweet)) %>% 
+  group_by(UF) %>% 
+  summarise(parlamentares = n(), participacao = (sum(n_proprio) + sum(n_retweet))/parlamentares)
+
+partic= sort(participacao_UF$participacao)
+top_5_part = partic[length(partic)-4]
+    
+participacao_UF %>% 
+  ggplot() +
+  geom_bar(stat="identity", aes(x = reorder(UF, -participacao) , y = participacao, fill = participacao >= top_5_part)) +
+  scale_fill_manual(labels = c("Outros", "Top 5"), values = c("#F8766D", "#00BFC4"), guide = guide_legend(reverse = TRUE)) +
+  xlab("UF") +
+  ylab("Participação") +
+  labs(fill = "UFs") +
+  ggtitle("Participação por parlamentares de cada UF no twitter em 2019")
+```
+
+
+# UFs com mais parlamentares no twitter
+```{r}
+
+tt_parlamentares =
+  atividade %>% 
+  filter(!is.na(twitter)) %>% 
+  group_by(UF) %>% 
+  summarise(possui_tt = n())
+
+top_5_tt = tt_parlamentares$possui_tt[length(tt_parlamentares$possui_tt)-4]
+
+tt_parlamentares %>% 
+  ggplot() +
+  geom_bar(stat="identity", aes(x = reorder(UF, -possui_tt) , y = possui_tt, fill = possui_tt >= top_5_tt)) +
+  scale_fill_manual(labels = c("Outros", "Top 5"), values = c("#F8766D", "#00BFC4"), guide = guide_legend(reverse = TRUE)) +
+  xlab("UF") +
+  ylab("Contas") +
+  labs(fill = "Contas de twitter por UF") +
+  ggtitle("Contas de twitter ativas em 2019 de parlamentares por UF")
+
+```
+
+```{r}
+atividade %>%
+  filter(!is.na(engaj_total)) %>% 
+  group_by(UF) %>% 
+  summarise(parlamentares = n(), media_engaj_total = mean(engaj_total)) %>% 
+  ggplot(aes(x = reorder(UF, -media_engaj_total), y = media_engaj_total)) +
+  geom_bar(stat = "identity") +
+  ylab("Média engajamento total") +
+  xlab("UF") +
+  scale_y_continuous(breaks = seq(0, 250000, by = 30000)) +
+  ggtitle("Engajamento total médio de cada UF")
+```
+
+```{r}
+atividade %>%
+  filter(!is.na(engaj_total)) %>% 
+  group_by(UF) %>% 
+  summarise(parlamentares = n(), media_engaj_total = mean(engaj_total)/parlamentares) %>% 
+  ggplot(aes(x = reorder(UF, -media_engaj_total), y = media_engaj_total)) +
+  geom_bar(stat = "identity") +
+  ylab("Média engajamento total por parlamentar") +
+  xlab("UF") +
+  scale_y_continuous(breaks = seq(0, 250000, by = 30000)) +
+  ggtitle("Engajamento total médio por parlamentar de cada UF")
+```
+
