@@ -15,9 +15,9 @@ theme: sandstone
 
 #####  A análise desenvolvida nesse relatório trata-se da segunda parte do laboratório 1 da disciplina Ciência de Dados Descritiva do curso de Ciência da Computação da UFCG.
 
-##### Na primeira parte do laborátio cada aluno desenvolveu seis perguntas a cerca dos dados disponibilizados pelo professor. O aluno pôde escolher entre dados que diziam respeito à séries de televisão, retirados do site IMDB, ou dados sobre os *Twitters* de parlamentares no ano de 2019. Os dados escolhidos por mim foram os dos parlamentares.
+##### Na primeira parte do laboratório cada aluno desenvolveu seis perguntas a cerca dos dados disponibilizados pelo professor. O aluno pôde escolher entre dados que diziam respeito à séries de televisão, retirados do site IMDB, ou dados sobre os *Twitters* de parlamentares no ano de 2019 (os dados foram coletados no dia 22 de março de 2019). Os dados escolhidos por mim foram os dos parlamentares.
 
-##### No desenvolvimento das perguntas na primeira parte do laboratório precisamos escolher um público alvo, cujo escolhi ser pessoas com interesse em entender como os parlamentares se relacionam e agem no *Twitter*.
+##### No desenvolvimento das perguntas na primeira parte do laboratório precisamos escolher um público alvo, cujo escolhi ser o úblico em geral com interesse em entender como os parlamentares se relacionam e agem no *Twitter*.
 
 ##### Das seis perguntas, tivemos que escolher duas e utilizar textos explicativos e visualizações criadas a partir dos dados para respondê-las. As minhas duas perguntas escolhidas foram:
 ##### 1. Quais foram as UFs que mais participaram do Twitter?
@@ -43,12 +43,12 @@ source(here::here("code/lib.R"))
 theme_set(theme_bw())
 ```
 
+###### Atribuindo os dados à variável *atividade*
 ```{r}
 atividade = read_projectdata()
 ```
-###### Atribuindo os dados à variável *atividade*
 
-##### Para responder essa pergunta utilizei as variáveis *n_proprio* e *n_retweet*, que ao serem somadas dão o total de tweets postados e retweetados (com e sem comentário) de cada usuário (parlamentar). Inicialmente para saber quais UFs mais participaram somei as variáveis e plotei em um gráfico de barras:
+##### Para responder essa pergunta utilizei a ideia de que a participação de uma UF seria a soma das variáveis *n_proprio* e *n_retweet*, que dão o total de tweets postados e retweetados (com e sem comentário) de cada usuário (parlamentar) da UF. Então para saber quais UFs mais participaram plotei a participação descrita em um gráfico de barras:
 
 ```{r}
 atividade %>% 
@@ -65,21 +65,11 @@ atividade %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-```{r}
-atividade %>% 
-  filter(!is.na(n_proprio)) %>% 
-  filter(!is.na(n_retweet)) %>% 
-  group_by(UF) %>% 
-  summarise(parlamentares = n(), participacao = (sum(n_proprio) + sum(n_retweet))/parlamentares) %>% 
-  ggplot() +
-  geom_bar(stat="identity", aes(x = reorder(UF, -participacao) , y = participacao)) +
-  xlab("UF") +
-  ylab("Participação") +
-  labs(fill = "UFs") +
-  ggtitle("Participação por parlamentares de cada UF no twitter em 2019") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
+##### A visualização acima respondeu a minha pergunta inicial de quais UFs mais participaram do Twitter, sendo possível observar da esquerda para direita suas posições. As UFs mais participativas foram: SP, RJ, MG, RS e PR.
 
+##### Mas como esses dados só mostram a soma de toda participação dos parlamentares das UFs e o número de parlamentares por UF é difente, me trouxe outro questionamento: **Quais as UFs tiveram mais participação por parlamentar?**
+
+#####Então resolvi observar quantos parlamentares com contas ativas no Twitter cada UF tinha. Plotei os dados em um gráfico de barras e resolvi comparar com o primeiro gráfico gerado.
 
 ```{r}
 atividade %>% 
@@ -95,6 +85,34 @@ atividade %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
+##### Como foi possível perceber, as UFs que mais tinham parlamentares foram também as que apresentaram maior participação no Twitter. Assim, decidi dividir a participação total de cada UF pelo número de parlamentares do gráfico acima. O resultado foi esse:
+
+```{r}
+atividade %>% 
+  filter(!is.na(n_proprio)) %>% 
+  filter(!is.na(n_retweet)) %>% 
+  group_by(UF) %>% 
+  summarise(parlamentares = n(), participacao = (sum(n_proprio) + sum(n_retweet))/parlamentares) %>% 
+  ggplot() +
+  geom_bar(stat="identity", aes(x = reorder(UF, -participacao) , y = participacao)) +
+  xlab("UF") +
+  ylab("Participação") +
+  labs(fill = "UFs") +
+  ggtitle("Participação por parlamentares de cada UF no twitter em 2019") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+##### Foi interessante perceber como UFs que não estavam entre as primeiras posições avançaram para posições com maior participação, e outras que pareciam estar tão à frente caíram no gráfico. Assim, a resposta à questão pode ser conferida observando o gráfico da esquerda para a direita. As cinco UFs que tiveram mais participação por parlamentar foram: MT, DF, AM, RJ e PR. 
+
+
+<br>
+
+### Quais foram as UFs que tiveram mais engajamento médio?
+
+***
+
+##### Já para responder a segunda pergunta inicial, foi preciso calcular o engajamento médio a partir das variáveis disponibilizadas nos dados. Para encontrar o engajamento médio de cada UF foi preciso agrupar os dados por UF e depois fazer a média do engajamento total dos seus respectivos parlamentares. Lembrando que engajamento total diz respeito ao número de likes + número de retweets que os tweets dos parlamentares receberam. Cada parlamentar possui um engajamento total, cuja variável é *engaj_total*.
+
 ```{r}
 atividade %>%
   filter(!is.na(engaj_total)) %>% 
@@ -109,6 +127,10 @@ atividade %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
+##### As UFs com mais engajamento médio total estão em ordem decrescente da esquerda para a direita, sendo a cinco primeiras: DF, RJ, SP, PR e RS.
+
+##### Ao observar o gráfico gerado tive o mesmo questionamento que tive ao visualizar o primeiro gráfico desta análise. Já que o número de parlamentares por UF difere, possivelmente causando maior concentração de dados em UFs com mais parlamentares, então **quais UFs têm mais engajamento médio por parlamentar de cada UF?**
+
 ```{r}
 atividade %>%
   filter(!is.na(engaj_total)) %>% 
@@ -118,7 +140,10 @@ atividade %>%
   geom_bar(stat = "identity") +
   ylab("Média engajamento total por parlamentar") +
   xlab("UF") +
-  scale_y_continuous(breaks = seq(0, 250000, by = 30000)) +
   ggtitle("Engajamento total médio por parlamentar de cada UF") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
+##### Da mesma forma que foi observado no gráfico *Participação por parlamentares de cada UF no twitter em 2019*, é perceptível que o número de parlamentares afeta a média de engajamento, mas o ranking do gráfico acima para o *Engajamento total médio de cada UF* não possui diferenças tão grandes.
+
+##### A partir do gráfico acima podemos observar as UFs com mais engajamento médio por parlamentar de cada UF estão em ordem decrescente da esquerda para a direita e as cinco primeiras colocadas são: DF, MT, AP, PR e RN.
